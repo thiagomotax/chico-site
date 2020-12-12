@@ -18,7 +18,7 @@ v-app
           | Lançamentos
 
     v-row(v-if='!loaded')
-      v-col(cols='6' md='3' xs='6' v-for="n in 4"  :key="n")
+      v-col(cols='6' md='3' xs='6' v-for="n in 4" :key="n")
         v-skeleton-loader.mx-auto(max-width='300' type='card')
     v-row(v-if='!loaded')
       v-col(cols='6' md='3' xs='6' v-for="n in 4" :key="n")
