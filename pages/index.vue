@@ -16,6 +16,14 @@ v-app
           | Maior Preço
         v-btn(value="justify", @click="orderByNews()")
           | Lançamentos
+
+    v-row(v-if='!loaded')
+      v-col(cols='6' md='3' xs='6' v-for="n in 4"  :key="n")
+        v-skeleton-loader.mx-auto(max-width='300' type='card')
+    v-row(v-if='!loaded')
+      v-col(cols='6' md='3' xs='6' v-for="n in 4" :key="n")
+        v-skeleton-loader.mx-auto(max-width='300' type='card')
+
     v-row
       v-col.pa-5(
         cols="6",
@@ -26,10 +34,10 @@ v-app
       )
         v-row
           img(:src="item.img_cover", width="100%", height="auto")
+        v-row.pt-1
+          span(style='font-family: Yanone; font-size: 19px; letter-spacing: .1em; font-weight:400; line-height:28.5px') {{ item.name }}
         v-row
-          span {{ item.name }}
-        v-row
-          span {{ item.price }}
+          span(style='font-family: Yanone; font-size: 19px; letter-spacing: .1em; font-weight:700; line-height:28.5px') R$ {{ item.price }}
     v-row(justify='center')
       v-progress-circular(indeterminate='' color='amber' v-if='loading')
     v-pagination(v-model="page", @input="next(page)", circle, :length="6")
@@ -46,7 +54,8 @@ export default {
       filters: [],
       order: null,
       page: 1,
-      loading: false
+      loading: false,
+      loaded: false
     }
   },
   async mounted () {
@@ -63,8 +72,10 @@ export default {
     },
     async getProducts (page) {
       this.loading = true
+      this.loaded = false
       // pick the rendered page, filter "html string" response data based by patterns and convert to JSON =D
       let response = []
+      this.products = []
       if (page) {
         response = await this.$axios.$get(
           `http://api.scraperapi.com?api_key=541e527d2f1c2927e30304af74880286&url=https://chicorei.com/camiseta/masculino/?page=${page}`
@@ -91,6 +102,7 @@ export default {
       // console.log(this.products, 'original products')
       // console.log(this.filters, 'original filters')
       // localStorage.products = matches[1] + ']'
+      this.loaded = true
       this.loading = false
     },
     orderByPriceAsc () {
