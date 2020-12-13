@@ -32,7 +32,7 @@ v-app
           v-col
             v-row
               span(
-                style="font-family: Yanone; font-size: 24.5px; font-weight: 400; line-height: 27.3pxs"
+                style="font-family: Yanone; font-size: 24.5px; font-weight: 400; line-height: 27.3px"
               ) TIPO
             v-row
               v-radio-group(v-model="radioType")
@@ -107,7 +107,16 @@ v-app
               ) R$ {{ item.price }}
         v-row(justify="center")
           v-progress-circular(indeterminate="", color="amber", v-if="loading")
-        v-pagination(v-model="page", @input="next(page)", circle, :length="6")
+        v-row(justify='center')
+          v-col(cols='12' md='12')
+            v-row
+              v-col(cols='10' md='10')
+                v-pagination(v-model="page", @input="getProducts()", circle, :total-visible="5", :length="Math.ceil(totalProducts / itensDisplay)")
+              v-col(cols='2' md='2')
+                v-row
+                  span(style="font-family: Yanone; font-size: 15.9x; font-weight: 400; line-height: 24px") Produtos por página
+                  v-select(v-model='itensDisplay' :items='listItensDisplay' label=''  @change='page = 1; getProducts()' dense='' outlined='')
+
 </template>
 
 <script>
@@ -117,6 +126,7 @@ export default {
   components: {},
   data () {
     return {
+      api_key: '541e527d2f1c2927e30304af74880286',
       products: [],
       categories: [],
       genders: [],
@@ -129,7 +139,10 @@ export default {
       radioGender: null,
       radioCategory: null,
       baseURL: 'https://chicorei.com',
-      URL: ''
+      URL: '',
+      listItensDisplay: [36, 60, 120],
+      itensDisplay: 36,
+      totalProducts: null
     }
   },
   watch: {
@@ -165,9 +178,6 @@ export default {
     await this.getProducts()
   },
   methods: {
-    next (page) {
-      this.getProducts(page)
-    },
     async getProducts (page) {
       // pick the rendered page, filter "html string" response data based by patterns and convert to JSON =D
       this.loading = true
@@ -197,8 +207,7 @@ export default {
       // }
 
       // 2 casos - quanto tem tipo e quando não tem tipo
-      // se tem tipo, o tipo fica no inicio de tudo
-      // funcionando ok, porem, se o gender for feminino, usar a image woman
+      // se tem tipo, o tipo fica no inicio de tudo, se não, fica /roupas
       if (this.radioType != null) {
         this.URL = `${this.baseURL}/${this.radioType}`
         if (this.radioGender != null && this.radioCategory != null) {
@@ -223,17 +232,14 @@ export default {
         }
       }
 
+      // add page selected and itens amount
+      this.URL += `?per_page=${this.itensDisplay}&page=${this.page}`
+
       console.log('url disparada', this.URL)
 
-      // if (page) {
-      //   response = await this.$axios.$get(
-      //     `http://api.scraperapi.com?api_key=541e527d2f1c2927e30304af74880286&url=${this.URL}?page=${page}`
-      //   )
-      // } else {
-      response = await this.$axios.$get(
-        `http://api.scraperapi.com?api_key=541e527d2f1c2927e30304af74880286&url=${this.URL}`
-      )
-      // }
+      response = await this.$axios.$get(`http://api.scraperapi.com?api_key=${this.api_key}&url=${this.URL}`)
+
+      this.totalProducts = parseInt(response.match('"totalHits":(.*),"hits":')[1]) // total products
 
       this.products = JSON.parse(
         response.match('"hits":(.*)],"per_page"')[1] + ']'
@@ -251,8 +257,7 @@ export default {
         response.match('"types":(.*)],"sizes_adult":')[1] + ']'
       ) // types
 
-      // console.log(this.types)
-
+      // local storages (for development use [save unecessary requests])
       // localStorage.products = response.match('"hits":(.*)],"per_page"')[1] + ']'
       // localStorage.categories = response.match('"categories":(.*)],"colors":')[1] + ']'
       // localStorage.genders = response.match('"genders":(.*)],"prices":')[1] + ']'
