@@ -175,8 +175,7 @@ v-app
             v-row
               img.rounded(
                 :src="radioGender == 'Feminino' && item.img_female != null ? item.img_female : radioGender == 'Masculino' && item.img_male != null ? item.img_male : item.img_cover",
-                width="100%",
-                height="auto"
+                style='width:100%; height: auto; align-self: flex-start;'
               )
             v-row.pt-1
               span(
