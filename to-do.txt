@@ -1,0 +1,6 @@
+current page in pagination (and the max)
+finish filters
+header
+
+
+REMOVER ACENTUACAO DOS FILTROS

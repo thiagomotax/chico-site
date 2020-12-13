@@ -57,7 +57,7 @@ v-app
                   :key="n.name",
                   :label="`${n.name}`",
                   :value="n.name",
-                  @click='getProducts()'
+                  @click="getProducts()"
                 )
 
         v-row.pa-3.mt-3.mb-3.rounded(style="background-color: #ededed")
@@ -72,8 +72,8 @@ v-app
                   v-for="n in categories",
                   :key="n.name",
                   :label="`${n.name}`",
-                  :value="n.name"
-                  @click='getProducts()'
+                  :value="n.name",
+                  @click="getProducts()"
                 )
 
       v-col(cols="12", md="9", xs="12")
@@ -92,8 +92,11 @@ v-app
             :key="item.message"
           )
             v-row
-              img.rounded(:src="radioGender == 'Feminino' ? item.img_female : radioGender == 'Masculino' ? item.img_male : item.img_cover",
-              width="100%", height="auto")
+              img.rounded(
+                :src="radioGender == 'Feminino' && item.img_female != null ? item.img_female : radioGender == 'Masculino' && item.img_male != null ? item.img_male : item.img_cover",
+                width="100%",
+                height="auto"
+              )
             v-row.pt-1
               span(
                 style="font-family: Yanone; font-size: 19px; letter-spacing: 0.1em; font-weight: 400; line-height: 28.5px"
@@ -165,7 +168,8 @@ export default {
     next (page) {
       this.getProducts(page)
     },
-    async getProducts (page) { // pick the rendered page, filter "html string" response data based by patterns and convert to JSON =D
+    async getProducts (page) {
+      // pick the rendered page, filter "html string" response data based by patterns and convert to JSON =D
       this.loading = true
       this.loaded = false
       let response = []
@@ -197,9 +201,26 @@ export default {
       // funcionando ok, porem, se o gender for feminino, usar a image woman
       if (this.radioType != null) {
         this.URL = `${this.baseURL}/${this.radioType}`
-        if (this.radioGender != null && this.radioCategory) { this.URL += `/${this.radioCategory}/${this.radioGender}` } else if (this.radioGender != null) { this.URL += `/${this.radioGender}` } else if (this.radioCategory) { this.URL += `/${this.radioCategory}` }
+        if (this.radioGender != null && this.radioCategory != null) {
+          this.URL += `/${this.slugify(
+            this.radioCategory
+          )}/${this.slugify(this.radioGender)}`
+        } else if (this.radioGender != null) {
+          this.URL += `/${this.slugify(this.radioGender)}`
+        } else if (this.radioCategory) {
+          this.URL += `/${this.slugify(this.radioCategory)}`
+        }
       } else {
-        this.URL = `${this.baseURL}/roupas/` // / a coisa
+        this.URL = `${this.baseURL}/roupas` // / a coisa
+        if (this.radioGender != null && this.radioCategory != null) {
+          this.URL += `/${this.slugify(
+            this.radioCategory
+          )}/${this.slugify(this.radioGender)}`
+        } else if (this.radioGender != null) {
+          this.URL += `/${this.slugify(this.radioGender)}`
+        } else if (this.radioCategory) {
+          this.URL += `/${this.slugify(this.radioCategory)}`
+        }
       }
 
       console.log('url disparada', this.URL)
@@ -210,7 +231,7 @@ export default {
       //   )
       // } else {
       response = await this.$axios.$get(
-          `http://api.scraperapi.com?api_key=541e527d2f1c2927e30304af74880286&url=${this.URL}`
+        `http://api.scraperapi.com?api_key=541e527d2f1c2927e30304af74880286&url=${this.URL}`
       )
       // }
 
@@ -257,7 +278,26 @@ export default {
       this.products = _.orderBy(this.products, ['id'], ['asc'])
       console.log(this.products, 'news')
     },
-    filterByGender () {}
+    filterByGender () {},
+    slugify (text) {
+      text = text.replace(/^\s+|\s+$/g, '') // trim
+      text = text.toLowerCase()
+
+      // remove accents, swap ñ for n, etc
+      const from = 'àáãäâèéëêìíïîòóöôùúüûñç·/_,:;'
+      const to = 'aaaaaeeeeiiiioooouuuunc------'
+
+      for (let i = 0, l = from.length; i < l; i++) {
+        text = text.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i))
+      }
+
+      text = text
+        .replace(/[^a-z0-9 -]/g, '') // remove invalid chars
+        .replace(/\s+/g, '-') // collapse whitespace and replace by -
+        .replace(/-+/g, '-') // collapse dashes
+
+      return text
+    }
   }
 }
 </script>
