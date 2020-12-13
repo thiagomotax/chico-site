@@ -230,12 +230,12 @@ export default {
     }
   },
   watch: {
-    radioType (val) {
-      console.log(val, ' radio value')
-    },
-    order: (val) => {
-      console.log(val, 'value order ')
-    }
+    // radioType (val) {
+    //   console.log(val, ' radio value')
+    // },
+    // order: (val) => {
+    //   console.log(val, 'value order ')
+    // }
   },
   async mounted () {
     // for low consume of api requests in development (quota :D)
@@ -286,7 +286,7 @@ export default {
           this.URL += `/${this.slugify(this.radioCategory)}`
         }
       } else {
-        this.URL = `${this.baseURL}/roupas` 
+        this.URL = `${this.baseURL}/roupas`
         if (this.radioGender != null && this.radioCategory != null) {
           this.URL += `/${this.slugify(
             this.radioCategory
@@ -301,10 +301,10 @@ export default {
       // add page selected, itens amount and page
       this.URL += `?per_page=${this.itensDisplay}&page=${this.page}&sort=${this.order}`
 
-      console.log('url disparada', this.URL)
+      // console.log('url disparada', this.URL)
       response = await this.$axios.$get(`https://api.scraperapi.com?api_key=${this.api_key}&url=${this.URL}`)
 
-      //colect data
+      // colect data
       this.totalProducts = parseInt(response.match('"totalHits":(.*),"hits":')[1]) // total products
       this.products = JSON.parse(
         response.match('"hits":(.*)],"per_page"')[1] + ']'
@@ -326,7 +326,7 @@ export default {
       // localStorage.types = response.match('"types":(.*)],"sizes_adult":')[1] + ']'
       this.loaded = true
       this.loading = false
-      console.log(this.products)
+      // console.log(this.products)
     },
     // order local (not to good, local)
     // orderByPriceAsc () {
