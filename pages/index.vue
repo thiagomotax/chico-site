@@ -6,19 +6,19 @@ v-app
         //- img(src='@/assets/logo-text.svg' height='150' width='200').green.pa-0.ma-0
     v-row.hidden-sm-and-down.red(justify-md="end", self-align="end")
       v-col.pt-0.mt-0.mb-0.pb-0(cols="12", md="6")
-        v-btn-toggle(
+        v-btn-toggle(@change='getScrapedPage()'
           v-model="order",
           tile="",
           color="deep-purple accent-3",
           group=""
         )
-          v-btn(value="left", @click="orderByDefault()")
+          v-btn(value="")
             | Padrão
-          v-btn(value="center", @click="orderByPriceAsc()")
+          v-btn(value="menor-preco")
             | Menor Preço
-          v-btn(value="right", @click="orderByPriceDesc()")
+          v-btn(value="maior-preco")
             | Maior Preço
-          v-btn(value="justify", @click="orderByNews()")
+          v-btn(value="lancamentos")
             | Lançamentos
 
   v-container
@@ -35,13 +35,13 @@ v-app
                 style="font-family: Yanone; font-size: 24.5px; font-weight: 400; line-height: 27.3px"
               ) TIPO
             v-row
-              v-radio-group(v-model="radioType")
+              v-radio-group(v-model="radioType" :disabled='!loaded')
                 v-radio(
                   v-for="n in types",
                   :key="n.name",
                   :label="`${n.name}`",
                   :value="n.name",
-                  @click="getProducts()"
+                  @click="getScrapedPage()"
                 )
 
         v-row.pa-3.mt-3.mb-3.rounded(style="background-color: #ededed")
@@ -51,13 +51,13 @@ v-app
                 style="font-family: Yanone; font-size: 24.5px; font-weight: 400; line-height: 27.3pxs"
               ) GÊNERO
             v-row
-              v-radio-group(v-model="radioGender")
+              v-radio-group(v-model="radioGender" :disabled='!loaded')
                 v-radio(
                   v-for="n in genders",
                   :key="n.name",
                   :label="`${n.name}`",
                   :value="n.name",
-                  @click="getProducts()"
+                  @click="getScrapedPage()"
                 )
 
         v-row.pa-3.mt-3.mb-3.rounded(style="background-color: #ededed")
@@ -67,13 +67,13 @@ v-app
                 style="font-family: Yanone; font-size: 24.5px; font-weight: 400; line-height: 27.3pxs"
               ) TEMA
             v-row
-              v-radio-group(v-model="radioCategory")
+              v-radio-group(v-model="radioCategory" :disabled='!loaded')
                 v-radio(
                   v-for="n in categories",
                   :key="n.name",
                   :label="`${n.name}`",
                   :value="n.name",
-                  @click="getProducts()"
+                  @click="getScrapedPage()"
                 )
 
       v-col(cols="12", md="9", xs="12")
@@ -111,16 +111,16 @@ v-app
           v-col(cols='12' md='12')
             v-row
               v-col(cols='10' md='10')
-                v-pagination(v-model="page", @input="getProducts()", circle, :total-visible="5", :length="Math.ceil(totalProducts / itensDisplay)")
+                v-pagination(v-model="page", @input="getScrapedPage()", circle, :total-visible="5", :length="Math.ceil(totalProducts / itensDisplay)")
               v-col(cols='2' md='2')
                 v-row
                   span(style="font-family: Yanone; font-size: 15.9x; font-weight: 400; line-height: 24px") Produtos por página
-                  v-select(v-model='itensDisplay' :items='listItensDisplay' label=''  @change='page = 1; getProducts()' dense='' outlined='')
+                  v-select(v-model='itensDisplay' :items='listItensDisplay' label=''  @change='page = 1; getScrapedPage()' dense='' outlined='')
 
 </template>
 
 <script>
-import _ from 'lodash'
+// import _ from 'lodash'
 
 export default {
   components: {},
@@ -131,7 +131,7 @@ export default {
       categories: [],
       genders: [],
       types: [],
-      order: null,
+      order: '',
       page: 1,
       loading: false,
       loaded: false,
@@ -148,6 +148,9 @@ export default {
   watch: {
     radioType (val) {
       console.log(val, ' radio value')
+    },
+    order: (val) => {
+      console.log(val, 'value order ')
     }
   },
   async mounted () {
@@ -175,10 +178,10 @@ export default {
     //   this.loading = false
     //   console.log(this.types, 'types')
     // }
-    await this.getProducts()
+    await this.getScrapedPage()
   },
   methods: {
-    async getProducts (page) {
+    async getScrapedPage (page) {
       // pick the rendered page, filter "html string" response data based by patterns and convert to JSON =D
       this.loading = true
       this.loaded = false
@@ -187,25 +190,6 @@ export default {
       this.URL = null
       // qd n tem tipo, eh so roupas / coisa
       // when user interacts with radio button, this function is called and the endpoint uri is created
-      // if (this.radioType == null && this.radioCategory == null && this.radioGender == null) {
-      //   this.URL = `${this.baseURL}/roupas`
-      // } else if (this.radioType != null) {
-      //   this.URL = `${this.baseURL}/${this.radioType}`
-      //   console.log('base url utilizada: ', this.URL)
-      // }
-
-      // if(this.radioType == null && )
-      // fazer os ifs com varias condicoes de existencia aqui em cima
-      // if (this.radioType != null) {
-      //   this.URL += `/${this.radioType}`
-      // }
-      // if (this.radioCategory != null) {
-      //   this.URL += `/${this.radioCategory}`
-      // }
-      // if (this.radioGender != null) {
-      //   this.URL += `/${this.radioGender}`
-      // }
-
       // 2 casos - quanto tem tipo e quando não tem tipo
       // se tem tipo, o tipo fica no inicio de tudo, se não, fica /roupas
       if (this.radioType != null) {
@@ -233,7 +217,8 @@ export default {
       }
 
       // add page selected and itens amount
-      this.URL += `?per_page=${this.itensDisplay}&page=${this.page}`
+
+      this.URL += `?per_page=${this.itensDisplay}&page=${this.page}&sort=${this.order}`
 
       console.log('url disparada', this.URL)
 
@@ -243,19 +228,19 @@ export default {
 
       this.products = JSON.parse(
         response.match('"hits":(.*)],"per_page"')[1] + ']'
-      ) // products
+      )
 
       this.categories = JSON.parse(
         response.match('"categories":(.*)],"colors":')[1] + ']'
-      ) // categories
+      )
 
       this.genders = JSON.parse(
         response.match('"genders":(.*)],"prices":')[1] + ']'
-      ) // genders
+      )
 
       this.types = JSON.parse(
         response.match('"types":(.*)],"sizes_adult":')[1] + ']'
-      ) // types
+      )
 
       // local storages (for development use [save unecessary requests])
       // localStorage.products = response.match('"hits":(.*)],"per_page"')[1] + ']'
@@ -267,23 +252,23 @@ export default {
       this.loading = false
       console.log(this.products)
     },
-    orderByPriceAsc () {
-      this.products = _.orderBy(this.products, ['price'], ['asc'])
-      console.log(this.products)
-    },
-    orderByPriceDesc () {
-      this.products = _.orderBy(this.products, ['price'], ['desc'])
-      console.log(this.products, 'dest price')
-    },
-    orderByNews () {
-      this.products = _.orderBy(this.products, ['is_new'], ['desc']) // bool, starts with 1
-      console.log(this.products, 'news')
-    },
-    orderByDefault () {
-      this.products = _.orderBy(this.products, ['id'], ['asc'])
-      console.log(this.products, 'news')
-    },
-    filterByGender () {},
+    // order local (not to good)
+    // orderByPriceAsc () {
+    //   this.products = _.orderBy(this.products, ['price'], ['asc'])
+    //   console.log(this.products)
+    // },
+    // orderByPriceDesc () {
+    //   this.products = _.orderBy(this.products, ['price'], ['desc'])
+    //   console.log(this.products, 'dest price')
+    // },
+    // orderByNews () {
+    //   this.products = _.orderBy(this.products, ['is_new'], ['desc']) // bool, starts with 1
+    //   console.log(this.products, 'news')
+    // },
+    // orderByDefault () {
+    //   this.products = _.orderBy(this.products, ['id'], ['asc'])
+    //   console.log(this.products, 'news')
+    // },
     slugify (text) {
       text = text.replace(/^\s+|\s+$/g, '') // trim
       text = text.toLowerCase()
