@@ -1,12 +1,95 @@
 <template lang="pug">
 v-app
-  v-container()
+  //- v-btn(dark='' large='' color='primary' fixed='' right='' bottom='')
+  //-   v-icon(dark='') Filtros
+  //- bottom bar
+  v-bottom-navigation(v-model='value' fixed='' bottom='').hidden-md-and-up
+    v-btn(value='recent' :disabled='!loaded' @click='sheetOrder = true')
+      span Ordenar
+      v-icon mdi-sort
+    v-btn(value='favorites' :disabled='!loaded' @click='sheetFilter = true')
+      span Filtrar
+      v-icon mdi-filter
+  //- bottom dialgo
+    v-bottom-sheet(v-model='sheet')
+  v-bottom-sheet(v-model='sheetOrder')
+    v-sheet(height='auto')
+      v-btn.mt-6(text='' color='red' @click='sheetOrder = !sheetOrder')
+        | fechar
+      .py-3
+        v-btn-toggle(@change='getScrapedPage()'
+          v-model="order",
+          tile="",
+          color="#FF8A1D",
+          group=""
+        )
+          v-list
+            v-list-item(height='30')
+              v-btn(text='' @click='sheetOrder = false' value="" style='color: black').text-none
+                | Padrão
+            v-list-item(height='30')
+              v-btn(text='' @click='sheetOrder = false' value="menor-preco" style='color: black').text-none
+                | Menor Preço
+            v-list-item(height='30')
+              v-btn(text='' @click='sheetOrder = false' value="maior-preco" style='color: black').text-none
+                | Maior Preço
+            v-list-item(height='30')
+              v-btn(text='' @click='sheetOrder = false' value="lancamentos" style='color: black').text-none
+                | Lançamentos
+
+  v-bottom-sheet(v-model='sheetFilter')
+    v-sheet(height='auto' )
+      v-btn.mt-6(text='' color='red' @click='sheetFilter = !sheetFilter')
+        | fechar
+      .py-3
+        v-list( style='max-height: 500px; overflow: hidden;').overflow-y-auto
+          v-list-item
+            span(
+              style="font-family: Yanone; font-size: 24.5px; font-weight: 400; line-height: 27.3px"
+            ) TIPO
+          v-list-item(justify='center')
+            v-radio-group(v-model="radioType" :disabled='!loaded')
+              v-radio(
+                v-for="n in types",
+                :key="n.name",
+                :label="`${n.name}`",
+                :value="n.name",
+                @click="sheetFilter=false; getScrapedPage()"
+              )
+          v-list-item
+            span(
+              style="font-family: Yanone; font-size: 24.5px; font-weight: 400; line-height: 27.3px"
+            ) GÊNERO
+          v-list-item
+            v-radio-group(v-model="radioGender" :disabled='!loaded')
+                v-radio(
+                  v-for="n in genders",
+                  :key="n.name",
+                  :label="`${n.name}`",
+                  :value="n.name",
+                  @click="sheetFilter=false; getScrapedPage()"
+                )
+          v-list-item
+            span(
+              style="font-family: Yanone; font-size: 24.5px; font-weight: 400; line-height: 27.3px"
+            ) CATEGORIA
+          v-list-item
+            v-radio-group(v-model="radioCategory" :disabled='!loaded')
+              v-radio(
+                v-for="n in categories",
+                :key="n.name",
+                :label="`${n.name}`",
+                :value="n.name",
+                @click="sheetFilter=false; getScrapedPage()"
+              )
+
+  v-container
     v-row
       v-col(cols="12", md="12", xs="12")
         v-row(justify='center' justify-md='start')
           img(src='@/assets/images/chico-cut.svg' width='150' height='auto')
 
-  v-container()
+  v-container
     v-row(no-gutters).hidden-sm-and-down
       v-col(cols="12", md="12")
         v-row(justify-md="end")
@@ -26,11 +109,11 @@ v-app
               | Lançamentos
 
     v-row
-      v-col.pr-md-10(cols="12", md="3", xs="12")
+      v-col.pr-md-10(cols="12", md="3", xs="12").hidden-sm-and-down
         v-row
           span(
             style="font-family: Yanone; font-size: 33px; font-weight: 400; line-height: 36.5pxs"
-          ) FILTROS
+          ).pa-2.pa-md-0 FILTROS
         v-row.pa-3.mt-3.mb-3.rounded(style="background-color: #ededed")
           v-col
             v-row
@@ -113,9 +196,9 @@ v-app
         v-row(justify='center')
           v-col(cols='12' md='12')
             v-row(align='center')
-              v-col(cols='9' md='9')
+              v-col(cols='12' md='9' xs='12')
                 v-pagination(v-model="page", @input="getScrapedPage()", :disabled='!loaded',circle, :total-visible="5", :length="Math.ceil(totalProducts / itensDisplay)")
-              v-col(cols='3' md='3')
+              v-col(cols='12' md='3' xs='12')
                 v-row(justify='end').mt-10
                   span(style="font-family: Yanone; font-size: 15.9x; font-weight: 400; line-height: 24px").pt-4 Produtos por página
                   v-select(v-model='itensDisplay' style='max-width: 90px', :disabled='!loaded', :items='listItensDisplay' label=''  @change='page = 1; getScrapedPage()' dense='' outlined='').pa-2
@@ -145,7 +228,10 @@ export default {
       URL: '',
       listItensDisplay: [36, 60, 120],
       itensDisplay: 36,
-      totalProducts: null
+      totalProducts: null,
+      sheetFilter: false,
+      sheetOrder: false,
+      value: 0
     }
   },
   watch: {
@@ -275,8 +361,6 @@ export default {
     slugify (text) {
       text = text.replace(/^\s+|\s+$/g, '') // trim
       text = text.toLowerCase()
-
-      // remove accents, swap ñ for n, etc
       const from = 'àáãäâèéëêìíïîòóöôùúüûñç·/_,:;'
       const to = 'aaaaaeeeeiiiioooouuuunc------'
 
