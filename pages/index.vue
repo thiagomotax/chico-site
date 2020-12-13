@@ -1,8 +1,5 @@
 <template lang="pug">
 v-app
-  //- v-btn(dark='' large='' color='primary' fixed='' right='' bottom='')
-  //-   v-icon(dark='') Filtros
-  //- bottom bar
   v-bottom-navigation(v-model='value' fixed='' bottom='' style='align-items: center !important').hidden-md-and-up
     v-btn(value='recent' :disabled='!loaded' @click='sheetOrder = true')
       span Ordenar
@@ -10,8 +7,6 @@ v-app
     v-btn(value='favorites' :disabled='!loaded' @click='sheetFilter = true')
       span Filtrar
       v-icon mdi-filter
-  //- bottom dialgo
-    v-bottom-sheet(v-model='sheet')
   v-bottom-sheet(v-model='sheetOrder')
     v-sheet(height='auto')
       v-btn.mt-6(text='' color='red' @click='sheetOrder = !sheetOrder')
@@ -277,10 +272,8 @@ export default {
       let response = []
       this.products = []
       this.URL = null
-      // qd n tem tipo, eh so roupas / coisa
       // when user interacts with radio button, this function is called and the endpoint uri is created
-      // 2 casos - quanto tem tipo e quando não tem tipo
-      // se tem tipo, o tipo fica no inicio de tudo, se não, fica /roupas
+      // 2 cases - when has type(/tipo) (camiseta ou moletom) or not (/roupas)
       if (this.radioType != null) {
         this.URL = `${this.baseURL}/${this.radioType}`
         if (this.radioGender != null && this.radioCategory != null) {
@@ -293,7 +286,7 @@ export default {
           this.URL += `/${this.slugify(this.radioCategory)}`
         }
       } else {
-        this.URL = `${this.baseURL}/roupas` // / a coisa
+        this.URL = `${this.baseURL}/roupas` 
         if (this.radioGender != null && this.radioCategory != null) {
           this.URL += `/${this.slugify(
             this.radioCategory
@@ -305,28 +298,23 @@ export default {
         }
       }
 
-      // add page selected and itens amount
-
+      // add page selected, itens amount and page
       this.URL += `?per_page=${this.itensDisplay}&page=${this.page}&sort=${this.order}`
 
       console.log('url disparada', this.URL)
-
       response = await this.$axios.$get(`https://api.scraperapi.com?api_key=${this.api_key}&url=${this.URL}`)
 
+      //colect data
       this.totalProducts = parseInt(response.match('"totalHits":(.*),"hits":')[1]) // total products
-
       this.products = JSON.parse(
         response.match('"hits":(.*)],"per_page"')[1] + ']'
       )
-
       this.categories = JSON.parse(
         response.match('"categories":(.*)],"colors":')[1] + ']'
       )
-
       this.genders = JSON.parse(
         response.match('"genders":(.*)],"prices":')[1] + ']'
       )
-
       this.types = JSON.parse(
         response.match('"types":(.*)],"sizes_adult":')[1] + ']'
       )
@@ -336,12 +324,11 @@ export default {
       // localStorage.categories = response.match('"categories":(.*)],"colors":')[1] + ']'
       // localStorage.genders = response.match('"genders":(.*)],"prices":')[1] + ']'
       // localStorage.types = response.match('"types":(.*)],"sizes_adult":')[1] + ']'
-
       this.loaded = true
       this.loading = false
       console.log(this.products)
     },
-    // order local (not to good)
+    // order local (not to good, local)
     // orderByPriceAsc () {
     //   this.products = _.orderBy(this.products, ['price'], ['asc'])
     //   console.log(this.products)

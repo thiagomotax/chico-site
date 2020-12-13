@@ -18,3 +18,9 @@ $ npm run generate
 ```
 
 For detailed explanation on how things work, check out [Nuxt.js docs](https://nuxtjs.org).
+
+To-do:
+
+1. componentization
+2. clean code
+3. structure code (design patterns)
