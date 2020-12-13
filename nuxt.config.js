@@ -20,6 +20,9 @@ export default {
     './assets/fonts/Yanone.css'
   ],
 
+  options: {
+    dist: 'dist'
+  },
   // Plugins to run before rendering page (https://go.nuxtjs.dev/config-plugins)
   plugins: [
   ],

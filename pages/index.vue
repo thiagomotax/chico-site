@@ -1,27 +1,30 @@
 <template lang="pug">
 v-app
-  v-container
+  v-container()
     v-row
-      v-col(cols="12", md="8", xs="12")
-        //- img(src='@/assets/logo-text.svg' height='150' width='200').green.pa-0.ma-0
-    v-row.hidden-sm-and-down.red(justify-md="end", self-align="end")
-      v-col.pt-0.mt-0.mb-0.pb-0(cols="12", md="6")
-        v-btn-toggle(@change='getScrapedPage()'
-          v-model="order",
-          tile="",
-          color="deep-purple accent-3",
-          group=""
-        )
-          v-btn(value="")
-            | Padrão
-          v-btn(value="menor-preco")
-            | Menor Preço
-          v-btn(value="maior-preco")
-            | Maior Preço
-          v-btn(value="lancamentos")
-            | Lançamentos
+      v-col(cols="12", md="12", xs="12")
+        v-row(justify='center' justify-md='start')
+          img(src='@/assets/images/chico-cut.svg' width='150' height='auto')
 
-  v-container
+  v-container()
+    v-row(no-gutters).hidden-sm-and-down
+      v-col(cols="12", md="12")
+        v-row(justify-md="end")
+          v-btn-toggle(@change='getScrapedPage()'
+            v-model="order",
+            tile="",
+            color="#FF8A1D",
+            group=""
+          )
+            v-btn(value="" style='color: black').text-none
+              | Padrão
+            v-btn(value="menor-preco" style='color: black').text-none
+              | Menor Preço
+            v-btn(value="maior-preco" style='color: black').text-none
+              | Maior Preço
+            v-btn(value="lancamentos" style='color: black').text-none
+              | Lançamentos
+
     v-row
       v-col.pr-md-10(cols="12", md="3", xs="12")
         v-row
@@ -109,13 +112,13 @@ v-app
           v-progress-circular(indeterminate="", color="amber", v-if="loading")
         v-row(justify='center')
           v-col(cols='12' md='12')
-            v-row
-              v-col(cols='10' md='10')
-                v-pagination(v-model="page", @input="getScrapedPage()", circle, :total-visible="5", :length="Math.ceil(totalProducts / itensDisplay)")
-              v-col(cols='2' md='2')
-                v-row
-                  span(style="font-family: Yanone; font-size: 15.9x; font-weight: 400; line-height: 24px") Produtos por página
-                  v-select(v-model='itensDisplay' :items='listItensDisplay' label=''  @change='page = 1; getScrapedPage()' dense='' outlined='')
+            v-row(align='center')
+              v-col(cols='9' md='9')
+                v-pagination(v-model="page", @input="getScrapedPage()", :disabled='!loaded',circle, :total-visible="5", :length="Math.ceil(totalProducts / itensDisplay)")
+              v-col(cols='3' md='3')
+                v-row(justify='end').mt-10
+                  span(style="font-family: Yanone; font-size: 15.9x; font-weight: 400; line-height: 24px").pt-4 Produtos por página
+                  v-select(v-model='itensDisplay' style='max-width: 90px', :disabled='!loaded', :items='listItensDisplay' label=''  @change='page = 1; getScrapedPage()' dense='' outlined='').pa-2
 
 </template>
 
