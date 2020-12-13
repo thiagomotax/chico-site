@@ -3,7 +3,7 @@ v-app
   //- v-btn(dark='' large='' color='primary' fixed='' right='' bottom='')
   //-   v-icon(dark='') Filtros
   //- bottom bar
-  v-bottom-navigation(v-model='value' fixed='' bottom='' style='align-itens: center !important').hidden-md-and-up
+  v-bottom-navigation(v-model='value' fixed='' bottom='' style='align-items: center !important').hidden-md-and-up
     v-btn(value='recent' :disabled='!loaded' @click='sheetOrder = true')
       span Ordenar
       v-icon mdi-sort
