@@ -2,3 +2,5 @@ future updates:
     componentization
     clean code
     structure code (design patterns)
+
+PS: Scrapping requests depend on a proxy, so they can take longer than expected (usually at first access). But it will work.
