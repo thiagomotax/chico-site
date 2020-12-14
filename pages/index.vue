@@ -301,7 +301,7 @@ export default {
       this.URL += `?per_page=${this.itensDisplay}&page=${this.page}&sort=${this.order}`
 
       // console.log('url disparada', this.URL)
-      response = await this.$axios.$get(`https://api.scraperapi.com?api_key=${this.api_key}&url=${this.URL}`)
+      response = await this.$axios.$get(this.URL)
 
       // colect data
       this.totalProducts = parseInt(response.match('"totalHits":(.*),"hits":')[1]) // total products
